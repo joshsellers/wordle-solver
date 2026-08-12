@@ -1,3 +1,5 @@
+import sys
+
 word_length = 5
 words = []
 
@@ -15,10 +17,12 @@ excluded_letters = []
 excluded_indices = {}
 max_occurances = {}
 
-word_frame = ['' for i in range(0, word_length)]
+word_frame = []
 
 
 def make_guess():
+    global word_length
+    global word_frame
     result = input('Enter word and results: ')
     if result.strip().lower() == 'exit':
         return True
@@ -27,6 +31,7 @@ def make_guess():
     if not loaded_words:
         word_length = len(input_word)
         load_words()
+        word_frame = ['' for i in range(0, word_length)]
 
     data = result.split(' ')[1]
 
@@ -77,8 +82,9 @@ def make_guess():
             if letter not in word:
                 return False
 
-        for letter in word_frame:
-            if letter != '' and word.index(letter) != word_frame.index(letter):
+        for i in range(0, word_length):
+            letter = word_frame[i]
+            if letter != '' and word[i] != letter:
                 return False
 
         for letter in max_occurances.keys():
@@ -103,6 +109,13 @@ def make_guess():
 
 
 if __name__ == '__main__':
+    debug = sys.argv[1] == '-d'
     exit = False
     while not exit:
         exit = make_guess()
+        if debug:
+            print(f'letters: {letters}')
+            print(f'excluded_letters: {excluded_letters}')
+            print(f'excluded_indices: {excluded_indices}')
+            print(f'max_occurances: {max_occurances}')
+            print(f'word_frame: {word_frame}')
