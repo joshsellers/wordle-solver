@@ -109,7 +109,7 @@ def make_guess():
 
 
 if __name__ == '__main__':
-    debug = sys.argv[1] == '-d'
+    debug = len(sys.argv) > 1 and sys.argv[1] == '-d'
     exit = False
     while not exit:
         exit = make_guess()
