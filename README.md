@@ -1,1 +1,3 @@
-#wordle-solver<br>Solves Wordles
+# wordle-solver
+
+Solves Wordles
