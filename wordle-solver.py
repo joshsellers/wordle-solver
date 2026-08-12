@@ -15,7 +15,7 @@ def load_words():
 letters = []
 excluded_letters = []
 excluded_indices = {}
-max_occurances = {}
+max_occurences = {}
 
 word_frame = []
 
@@ -44,12 +44,12 @@ def make_guess():
                     excluded_indices[input_word[i]] = []
                 excluded_indices[input_word[i]].append(i)
 
-                max_occurances[input_word[i]] = 0
+                max_occurences[input_word[i]] = 0
                 for j in range(0, len(input_word)):
                     if j == i:
                         break
                     if input_word[j] == input_word[i]:
-                        max_occurances[input_word[i]] += 1
+                        max_occurences[input_word[i]] += 1
 
         elif data[i] == '1':
             if input_word[i] not in excluded_indices:
@@ -87,13 +87,13 @@ def make_guess():
             if letter != '' and word[i] != letter:
                 return False
 
-        for letter in max_occurances.keys():
-            occurances = 0
+        for letter in max_occurences.keys():
+            occurences = 0
             for character in word:
                 if character == letter:
-                    occurances += 1
+                    occurences += 1
 
-            if occurances > max_occurances[letter]:
+            if occurences > max_occurences[letter]:
                 return False
 
         return True
@@ -117,5 +117,5 @@ if __name__ == '__main__':
             print(f'letters: {letters}')
             print(f'excluded_letters: {excluded_letters}')
             print(f'excluded_indices: {excluded_indices}')
-            print(f'max_occurances: {max_occurances}')
+            print(f'max_occurences: {max_occurences}')
             print(f'word_frame: {word_frame}')
