@@ -1,11 +1,13 @@
 word_length = 5
 words = []
 
-
+loaded_words = False
 def load_words():
     with open('words_alpha.txt', 'r') as words_file:
         for line in words_file:
             if len(line.strip()) == word_length: words.append(line.strip())
+
+    loaded_words = True
 
 
 letters = []
@@ -22,6 +24,10 @@ def make_guess():
         return True
 
     input_word = result.split(' ')[0]
+    if not loaded_words:
+        word_length = len(input_word)
+        load_words()
+
     data = result.split(' ')[1]
 
     for i in range(0, len(input_word)):
@@ -97,8 +103,6 @@ def make_guess():
 
 
 if __name__ == '__main__':
-    load_words()
-
     exit = False
     while not exit:
         exit = make_guess()
