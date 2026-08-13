@@ -1,11 +1,14 @@
 import sys
+import os
 
 word_length = 5
 words = []
 
 loaded_words = False
 def load_words():
-    with open('words_alpha.txt', 'r') as words_file:
+    base_path = f'{os.path.realpath(os.path.dirname(__file__))}/'
+
+    with open(f'{base_path}words_alpha.txt', 'r') as words_file:
         for line in words_file:
             if len(line.strip()) == word_length: words.append(line.strip())
 
@@ -53,6 +56,10 @@ def make_guess():
         word_frame = ['' for i in range(0, word_length)]
 
     data = result.split(' ')[1]
+
+    if len(input_word) != len(data):
+        print('\nInput word and results are of different lengths!')
+        return False
 
     for i in range(0, len(input_word)):
         if data[i] == '0':
