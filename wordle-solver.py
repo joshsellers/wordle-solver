@@ -49,16 +49,21 @@ def make_guess():
         word_frame = []
         return False
 
-    input_word = result.split(' ')[0]
+    results_split = result.split(' ')
+    if len(results_split) != 2:
+        print('Invalid results!')
+        return False
+
+    input_word = results_split[0]
     if not loaded_words:
         word_length = len(input_word)
         load_words()
         word_frame = ['' for i in range(0, word_length)]
 
-    data = result.split(' ')[1]
+    data = results_split[1]
 
     if len(input_word) != len(data):
-        print('\nInput word and results are of different lengths!')
+        print('Input word and results are of different lengths!')
         return False
 
     for i in range(0, len(input_word)):
