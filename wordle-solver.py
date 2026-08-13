@@ -70,6 +70,12 @@ def make_guess():
         if data[i] == '0':
             if input_word[i] not in letters:
                 excluded_letters.append(input_word[i])
+
+                for j in range(0, len(input_word)):
+                    if input_word[j] == input_word[i] and data[j] != '0':
+                        if input_word[i] not in excluded_indices:
+                            excluded_indices[input_word[i]] = []
+                        excluded_indices[input_word[i]].append(i)
             else:
                 if input_word[i] not in excluded_indices:
                     excluded_indices[input_word[i]] = []
