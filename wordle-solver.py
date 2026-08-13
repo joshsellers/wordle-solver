@@ -6,11 +6,14 @@ words = []
 
 loaded_words = False
 def load_words():
+    global loaded_words
+
     base_path = f'{os.path.realpath(os.path.dirname(__file__))}/'
 
     with open(f'{base_path}words_alpha.txt', 'r') as words_file:
         for line in words_file:
-            if len(line.strip()) == word_length: words.append(line.strip())
+            if len(line.strip()) == word_length: 
+                words.append(line.strip())
 
     loaded_words = True
 
@@ -22,6 +25,47 @@ max_occurences = {}
 min_occurences = {}
 
 word_frame = []
+
+
+def test_word(word):
+    for char, indices in excluded_indices.items():
+        if char in word:
+            for index in indices:
+                if word[index] == char:
+                    return False
+
+    for letter in excluded_letters:
+        if letter in word:
+            return False
+
+    for letter in letters:
+        if letter not in word:
+            return False
+
+    for i in range(0, word_length):
+        letter = word_frame[i]
+        if letter != '' and word[i] != letter:
+            return False
+
+    for letter in max_occurences.keys():
+        occurences = 0
+        for character in word:
+            if character == letter:
+                occurences += 1
+
+        if occurences > max_occurences[letter]:
+            return False
+
+    for letter in min_occurences.keys():
+        occurences = 0
+        for character in word:
+            if character == letter:
+                occurences += 1
+
+        if occurences < min_occurences[letter]:
+            return False
+
+    return True
 
 
 def make_guess():
@@ -47,6 +91,7 @@ def make_guess():
         max_occurences = {}
         min_occurences = {}
         word_frame = []
+        loaded_words = False
         return False
 
     results_split = result.split(' ')
@@ -92,15 +137,23 @@ def make_guess():
             excluded_indices[input_word[i]].append(i)
             letters.append(input_word[i])
 
-            if input_word[i] in excluded_letters:
-                excluded_letters.pop(excluded_letters.index(input_word[i]))
+            pop_indicies = []
+            for j in range(0, len(excluded_letters)):
+                if excluded_letters[j] == input_word[i]:
+                    pop_indicies.append(j)
+            for j in range(0, len(pop_indicies)):
+                excluded_letters.pop(pop_indicies[j] - j)
 
         elif data[i] == '2':
             word_frame[i] = input_word[i]
             letters.append(input_word[i])
 
-            if input_word[i] in excluded_letters:
-                excluded_letters.pop(excluded_letters.index(input_word[i]))
+            pop_indicies = []
+            for j in range(0, len(excluded_letters)):
+                if excluded_letters[j] == input_word[i]:
+                    pop_indicies.append(j)
+            for j in range(0, len(pop_indicies)):
+                excluded_letters.pop(pop_indicies[j] - j)
 
     checked_letters = []
     for i in range(word_length):
@@ -112,46 +165,6 @@ def make_guess():
                 if input_word[j] == letter and data[j] != '0':
                     min_occurences[letter] += 1
             checked_letters.append(letter)
-
-    def test_word(word):
-        for char, indices in excluded_indices.items():
-            if char in word:
-                for index in indices:
-                    if word[index] == char:
-                        return False
-
-        for letter in excluded_letters:
-            if letter in word:
-                return False
-
-        for letter in letters:
-            if letter not in word:
-                return False
-
-        for i in range(0, word_length):
-            letter = word_frame[i]
-            if letter != '' and word[i] != letter:
-                return False
-
-        for letter in max_occurences.keys():
-            occurences = 0
-            for character in word:
-                if character == letter:
-                    occurences += 1
-
-            if occurences > max_occurences[letter]:
-                return False
-
-        for letter in min_occurences.keys():
-            occurences = 0
-            for character in word:
-                if character == letter:
-                    occurences += 1
-
-            if occurences < min_occurences[letter]:
-                return False
-
-        return True
 
     candidate_words = []
     for word in words:
