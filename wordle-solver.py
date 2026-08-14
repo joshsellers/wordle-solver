@@ -231,7 +231,7 @@ def auto_play():
         return False
 
     guess = random.choice(candidates)
-    print(f'Guess: {guess} ({len(candidates)} possible words)')
+    print(f'Guess: {guess} ({len(candidates)} possible word' + ('s)' if len(candidates) != 1 else ')'))
 
     result = input('Enter results: ')
 
