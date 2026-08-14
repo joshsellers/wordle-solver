@@ -382,11 +382,6 @@ def print_debug():
 
 
 if __name__ == '__main__':
-    load_words()
-    print(non_words)
-    exit()
-
-
     debug = len(sys.argv) > 1 and sys.argv[1] == '-d' or len(sys.argv) > 2 and (sys.argv[1] == '-d' or sys.argv[2] == '-d')
 
     full_play_mode = len(sys.argv) > 2 and (sys.argv[1] == '-fp' or sys.argv[2] == '-fp') or len(sys.argv) > 1 and sys.argv[1] == '-fp'
