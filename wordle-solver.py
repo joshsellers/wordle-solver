@@ -237,7 +237,7 @@ def process_user_guess():
 
 
 def add_non_word(word):
-    non_words.append(word)
+    non_words.append(word.replace('$', ''))
     with open(f'{os.path.realpath(os.path.dirname(__file__))}/non_words.txt', 'a') as non_words_file:
         non_words_file.write(f'{word}\n')
 
