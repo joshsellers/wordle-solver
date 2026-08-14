@@ -26,6 +26,7 @@ answer = ''
 guess_round = 0
 solves = 0
 total_rounds = 0
+total_guesses = 0
 
 
 def reset():
@@ -298,6 +299,7 @@ def train():
     global loaded_words
     global solves
     global total_rounds
+    global total_guesses
 
     word_length = 5
 
@@ -307,6 +309,7 @@ def train():
         print(f'Failed! Answer was {answer}')
         total_rounds += 1
         print(f'Solve rate: {solves / total_rounds * 100}%')
+        print(f'Averages guesses per round: {total_guesses / total_rounds}\n')
         reset()
         return False
 
@@ -332,7 +335,9 @@ def train():
         print(f'Solved in {guess_round + 1} guess' + ('es' if guess_round != 1 else '!'))
         total_rounds += 1
         solves += 1
+        total_guesses += 1
         print(f'Solve rate: {solves / total_rounds * 100}%')
+        print(f'Averages guesses per round: {total_guesses / total_rounds}\n')
         reset()
         return False
 
@@ -340,6 +345,8 @@ def train():
         print('Word not allowed!')
         add_non_word(f'{guess}$')
         return False
+    else:
+        total_guesses += 1
 
     results = ''
     for i in range(0, word_length):
