@@ -12,3 +12,7 @@ choca
 lungy
 morth
 mordv
+ikona
+taled
+palmo
+alloo
