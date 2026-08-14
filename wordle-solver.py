@@ -1,5 +1,7 @@
 import sys
 import os
+from pathlib import Path
+import random
 
 loaded_words = False
 
@@ -14,6 +16,8 @@ min_occurences = {}
 
 word_frame = []
 
+non_words = []
+
 
 def reset():
     global letters
@@ -23,6 +27,9 @@ def reset():
     global min_occurences
     global loaded_words
     global words
+    global non_words
+    global word_frame
+    global word_length
 
     loaded_words = False
     word_length = 5
@@ -33,6 +40,7 @@ def reset():
     max_occurences = {}
     min_occurences = {}
     word_frame = []
+    non_words = []
 
     print('Reset memory')
 
@@ -46,6 +54,13 @@ def load_words():
         for line in words_file:
             if len(line.strip()) == word_length: 
                 words.append(line.strip())
+
+    non_words_path = f'{base_path}non_words.txt'
+    if Path(non_words_path).exists():
+        with open(non_words_path, 'r') as non_words_file:
+            for line in non_words_file:
+                if len(line.strip()) == word_length:
+                    non_words.append(line.strip())
 
     loaded_words = True
 
@@ -152,7 +167,7 @@ def gather_candidates():
     return candidate_words
 
 
-def make_guess():
+def process_user_guess():
     global word_length
     global word_frame
 
@@ -197,17 +212,74 @@ def make_guess():
     return False
 
 
-if __name__ == '__main__':
-    debug = len(sys.argv) > 1 and sys.argv[1] == '-d'
-    exit = False
-    while not exit:
-        exit = make_guess()
+def auto_play():
+    global word_length
+    global word_frame
+    if not loaded_words:
+        word_length = int(input('Enter word length: '))
         print()
-        if debug:
-            print(f'letters: {letters}')
-            print(f'excluded_letters: {excluded_letters}')
-            print(f'excluded_indices: {excluded_indices}')
-            print(f'max_occurences: {max_occurences}')
-            print(f'min_occurences: {min_occurences}')
-            print(f'word_frame: {word_frame}')
-            print()
+        word_frame = ['' for i in range(0, word_length)]
+        load_words()
+
+    candidates = gather_candidates()
+    for non_word in non_words:
+        if non_word in candidates:
+            candidates.pop(candidates.index(non_word))
+
+    guess = random.choice(candidates)
+    print(f'Guess: {guess}')
+
+    result = input('Enter results: ')
+
+    if result.strip().lower() == 'exit':
+        return True
+    elif result.strip().lower() == 'reset':
+        reset()
+        return False
+    elif result.strip().lower() == 'nonword':
+        non_words.append(guess)
+        with open(f'{os.path.realpath(os.path.dirname(__file__))}/non_words.txt', 'a') as non_words_file:
+            non_words_file.write(f'{guess}\n')
+        return False
+
+    if len(result) != word_length:
+        print(f'Need results with {word_length} numbers!')
+        return False
+
+    for entry in result:
+        if entry != '0' and entry != '1' and entry != '2':
+            print(f"Invalid results! '{entry}' is not a valid result")
+            return False
+
+    analyze_data(guess, result)
+
+    calculate_min_occurences(guess, result)
+
+    return False
+
+
+def print_debug():
+    if debug:
+        print(f'letters: {letters}')
+        print(f'excluded_letters: {excluded_letters}')
+        print(f'excluded_indices: {excluded_indices}')
+        print(f'max_occurences: {max_occurences}')
+        print(f'min_occurences: {min_occurences}')
+        print(f'word_frame: {word_frame}')
+        print()
+
+
+if __name__ == '__main__':
+    debug = len(sys.argv) > 1 and sys.argv[1] == '-d' or len(sys.argv) > 2 and (sys.argv[1] == '-d' or sys.argv[2] == '-d')
+
+    full_play_mode = len(sys.argv) > 2 and (sys.argv[1] == '-fp' or sys.argv[2] == '-fp') or len(sys.argv) > 1 and sys.argv[1] == '-fp'
+
+    exit = False
+
+    while not exit:
+        exit = auto_play() if full_play_mode else process_user_guess()
+
+        print()
+        print_debug()
+
+        
