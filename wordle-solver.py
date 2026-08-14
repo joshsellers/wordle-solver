@@ -2,6 +2,7 @@ import sys
 import os
 from pathlib import Path
 import random
+import time
 
 loaded_words = False
 
@@ -18,6 +19,12 @@ word_frame = []
 
 non_words = []
 
+wordle_allowed_words = []
+
+training_mode = False
+answer = ''
+guess_round = 0
+
 
 def reset():
     global letters
@@ -30,17 +37,23 @@ def reset():
     global non_words
     global word_frame
     global word_length
+    global wordle_allowed_words
+    global guess_round
 
     loaded_words = False
     word_length = 5
-    words = []
     letters = []
     excluded_letters = []
     excluded_indices = {}
     max_occurences = {}
     min_occurences = {}
     word_frame = []
-    non_words = []
+    guess_round = 0
+
+    if not training_mode:
+        non_words = []
+        wordle_allowed_words = []
+        words = []
 
     print('Reset memory')
 
@@ -60,7 +73,14 @@ def load_words():
         with open(non_words_path, 'r') as non_words_file:
             for line in non_words_file:
                 if len(line.strip()) == word_length:
+                    if '$' in line:
+                        line = line.replace('$', '')
                     non_words.append(line.strip())
+
+    if training_mode:
+        with open(f'{base_path}wordle-allowed-guesses.txt', 'r') as wordle_file:
+            for line in wordle_file:
+                wordle_allowed_words.append(line.strip())
 
     loaded_words = True
 
@@ -212,9 +232,16 @@ def process_user_guess():
     return False
 
 
+def add_non_word(word):
+    non_words.append(guess)
+    with open(f'{os.path.realpath(os.path.dirname(__file__))}/non_words.txt', 'a') as non_words_file:
+        non_words_file.write(f'{guess}\n')
+
+
 def auto_play():
     global word_length
     global word_frame
+
     if not loaded_words:
         word_length = int(input('Enter word length: '))
         print()
@@ -241,9 +268,7 @@ def auto_play():
         reset()
         return False
     elif result.strip().lower() == 'nonword':
-        non_words.append(guess)
-        with open(f'{os.path.realpath(os.path.dirname(__file__))}/non_words.txt', 'a') as non_words_file:
-            non_words_file.write(f'{guess}\n')
+        add_non_word(guess)
         return False
 
     if len(result) != word_length:
@@ -258,6 +283,88 @@ def auto_play():
     analyze_data(guess, result)
 
     calculate_min_occurences(guess, result)
+
+    return False
+
+
+def train():
+    global word_length
+    global word_frame
+    global answer
+    global guess_round
+    global loaded_words
+
+    word_length = 5
+
+    max_rounds = 6
+
+    if guess_round == max_rounds:
+        print(f'Failed! Answer was {answer}')
+        reset()
+        return False
+
+    if not loaded_words:
+        word_frame = ['' for i in range(0, word_length)]
+        answer = random.choice(wordle_allowed_words)
+        loaded_words = True
+
+    candidates = gather_candidates()
+    for non_word in non_words:
+        if non_word in candidates:
+            candidates.pop(candidates.index(non_word))
+
+    if not candidates:
+        print(f'Ran out of candidates! Answer was: {answer}')
+        input('Press enter to exit: ')
+        return True
+
+    guess = random.choice(candidates)
+    print(f'Guess: {guess} ({len(candidates)} possible word' + ('s)' if len(candidates) != 1 else ')'))
+
+    if guess == answer:
+        print(f'Solved in {guess_round + 1} guess' + ('es' if guess_round != 1 else '!'))
+        reset()
+        return False
+
+    if guess not in wordle_allowed_words:
+        print('Word not allowed!')
+        add_non_word(f'{guess}$')
+        return False
+
+    results = ''
+    for i in range(0, word_length):
+        guess_letter = guess[i]
+        answer_letter = answer[i]
+
+        if guess_letter == answer_letter:
+            results += '2'
+        elif guess_letter not in answer:
+            results += '0'
+        elif guess_letter in answer:
+            count_answer = 0
+            for j in range(0, word_length):
+                if answer[j] == guess_letter and answer[j] != guess[j]:
+                    count_answer += 1
+
+            count_guess = 0
+            for j in range(0, i):
+                if guess[j] == guess_letter:
+                    count_guess += 1
+
+            if count_guess < count_answer:
+                results += '1'
+            else:
+                results += '0'
+
+    print(f'Results: {results}')
+
+    analyze_data(guess, results)
+
+    calculate_min_occurences(guess, results)
+
+    guess_round += 1
+
+    time.sleep(1)
 
     return False
 
@@ -278,10 +385,21 @@ if __name__ == '__main__':
 
     full_play_mode = len(sys.argv) > 2 and (sys.argv[1] == '-fp' or sys.argv[2] == '-fp') or len(sys.argv) > 1 and sys.argv[1] == '-fp'
 
+    training_mode = len(sys.argv) > 1 and sys.argv[1] == '-t'
+    if training_mode:
+        debug = True
+        load_words()
+        loaded_words = False
+
     exit = False
 
     while not exit:
-        exit = auto_play() if full_play_mode else process_user_guess()
+        if full_play_mode:
+            exit = auto_play()
+        elif training_mode:
+            exit = train()
+        else:
+            exit = process_user_guess()
 
         print()
         print_debug()
