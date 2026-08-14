@@ -72,10 +72,11 @@ def load_words():
     if Path(non_words_path).exists():
         with open(non_words_path, 'r') as non_words_file:
             for line in non_words_file:
-                if len(line.strip()) == word_length:
-                    if '$' in line:
-                        line = line.replace('$', '')
-                    non_words.append(line.strip())
+                line_replaced = line
+                if '$' in line_replaced:
+                    line_replaced = line.replace('$', '')
+                if len(line_replaced.strip()) == word_length:
+                    non_words.append(line_replaced.strip())
 
     if training_mode:
         with open(f'{base_path}wordle-allowed-guesses.txt', 'r') as wordle_file:
@@ -233,9 +234,9 @@ def process_user_guess():
 
 
 def add_non_word(word):
-    non_words.append(guess)
+    non_words.append(word)
     with open(f'{os.path.realpath(os.path.dirname(__file__))}/non_words.txt', 'a') as non_words_file:
-        non_words_file.write(f'{guess}\n')
+        non_words_file.write(f'{word}\n')
 
 
 def auto_play():
@@ -381,6 +382,11 @@ def print_debug():
 
 
 if __name__ == '__main__':
+    load_words()
+    print(non_words)
+    exit()
+
+
     debug = len(sys.argv) > 1 and sys.argv[1] == '-d' or len(sys.argv) > 2 and (sys.argv[1] == '-d' or sys.argv[2] == '-d')
 
     full_play_mode = len(sys.argv) > 2 and (sys.argv[1] == '-fp' or sys.argv[2] == '-fp') or len(sys.argv) > 1 and sys.argv[1] == '-fp'
