@@ -226,6 +226,10 @@ def auto_play():
         if non_word in candidates:
             candidates.pop(candidates.index(non_word))
 
+    if not candidates:
+        print('Ran out of guesses!')
+        return False
+
     guess = random.choice(candidates)
     print(f'Guess: {guess}')
 
