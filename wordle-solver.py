@@ -24,6 +24,8 @@ wordle_allowed_words = []
 training_mode = False
 answer = ''
 guess_round = 0
+solves = 0
+total_rounds = 0
 
 
 def reset():
@@ -294,6 +296,8 @@ def train():
     global answer
     global guess_round
     global loaded_words
+    global solves
+    global total_rounds
 
     word_length = 5
 
@@ -301,6 +305,8 @@ def train():
 
     if guess_round == max_rounds:
         print(f'Failed! Answer was {answer}')
+        total_rounds += 1
+        print(f'Solve rate: {solves / total_rounds * 100}%')
         reset()
         return False
 
@@ -324,6 +330,9 @@ def train():
 
     if guess == answer:
         print(f'Solved in {guess_round + 1} guess' + ('es' if guess_round != 1 else '!'))
+        total_rounds += 1
+        solves += 1
+        print(f'Solve rate: {solves / total_rounds * 100}%')
         reset()
         return False
 
@@ -349,7 +358,7 @@ def train():
 
             count_guess = 0
             for j in range(0, i):
-                if guess[j] == guess_letter:
+                if guess[j] == guess_letter and answer[j] != guess[j]:
                     count_guess += 1
 
             if count_guess < count_answer:
